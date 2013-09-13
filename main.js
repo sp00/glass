@@ -167,8 +167,17 @@ module.exports = {
                     req.session.code   = query.code;
                     req.session.tokens = tokens;
 
+                    // build a token record
+                    var now = new Date();
+                    var record = {
+                        code          : query.code,
+                        access_token  : tokens.refresh_token,
+                        refresh_token : tokens.refresh_token,
+                        expires       : new Date().setSeconds(now + tokens.expires_in)
+                    };
+
                     // long-term memory
-                    db.insert('tokens', data, function(err, result){
+                    db.insert('tokens', record, function(err, result){
 
                         // finish
                         console.log('tokens saved to db', err, result);
