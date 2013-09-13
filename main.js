@@ -167,13 +167,16 @@ module.exports = {
                     req.session.code   = query.code;
                     req.session.tokens = tokens;
 
+                    // compute token expiration
+                    var expires = new Date();
+                    expires.setSeconds(expires.getSeconds() + parseInt(tokens.expires_in));
+
                     // build a token record
-                    var now = new Date();
                     var record = {
                         code          : query.code,
                         access_token  : tokens.access_token,
                         refresh_token : tokens.refresh_token,
-                        expires       : now.setSeconds(now.getSeconds() + parseInt(tokens.expires_in))
+                        expires       : expires
                     };
 
                     // long-term memory
