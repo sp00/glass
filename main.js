@@ -163,14 +163,26 @@ module.exports = {
 
                     console.log('no errors, remembering tokens', tokens);
 
-                    // remember
+                    // short-term memory
                     req.session.code   = query.code;
                     req.session.tokens = tokens;
 
-                }
+                    // long-term memory
+                    db.insert('tokens', data, function(err, result){
 
-                // finish
-                callback(err);
+                        // finish
+                        console.log('tokens saved to db', err, result);
+                        callback(err);
+
+                    });
+
+                } else {
+
+                    // post failed
+                    console.log('post failed');
+                    callback(err);
+
+                }
 
             });
 
