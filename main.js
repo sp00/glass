@@ -50,6 +50,8 @@ module.exports = {
      */
     configure: function(options){
 
+        var delegate = this;
+
         if (options.apiKey !== undefined && options.clientId !== undefined && options.clientSecret !== undefined && options.callbackUri !== undefined){
 
             this.options.apiKey         = options.apiKey;
@@ -68,7 +70,7 @@ module.exports = {
             options.scopes.forEach(function(scope){
 
                 if (!/glass\.timeline/.test(scope)){
-                    this.options.scopes.push(scope);
+                    delegate.options.scopes.push(scope);
                 }
 
             });
