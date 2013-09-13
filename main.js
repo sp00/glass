@@ -135,14 +135,15 @@ module.exports = {
      * @param {Function} callback(err)
      */
     remember: function(req, res, callback){
+        console.log('remember()');
 
         var query = url.parse(req.url, true).query;
+        console.log('query', query);
 
         if (query.code !== undefined){
 
-            // auth succeeded, get tokens
-            request.post({
-
+            // prepare token request
+            var options = {
                 uri  : this.options.tokenUri,
                 form : {
                     code            : query.code,
@@ -152,10 +153,15 @@ module.exports = {
                     grant_type      : 'authorization_code'
                 },
                 json : true
+            };
+            console.log('post options', options);
 
-            }, function(err, tokens){
+            // auth succeeded, get tokens
+            request.post(options, function(err, tokens){
 
                 if (!err){
+
+                    console.log('no errors, remembering tokens', tokens);
 
                     // remember
                     req.session.code   = query.code;
@@ -164,13 +170,14 @@ module.exports = {
                 }
 
                 // finish
-                callback(undefined);
+                callback(err);
 
             });
 
         } else {
 
             // authentication failed
+            console.log('auth failed');
             callback('Authentication failed');
 
         }
