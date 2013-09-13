@@ -90,7 +90,7 @@ module.exports = {
         return this.options.authUri +
             '?response_type=code' +
             '&client_id=' + this.options.clientId +
-            '&redirect_id=' + this.options.callbackUri +
+            '&redirect_uri=' + this.options.callbackUri +
             '&scope=' + encodeURIComponent(this.options.scopes.join('+')) +
             '&state=default' +
             '&access_type=offline' +
