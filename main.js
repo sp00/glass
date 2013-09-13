@@ -171,9 +171,9 @@ module.exports = {
                     var now = new Date();
                     var record = {
                         code          : query.code,
-                        access_token  : tokens.refresh_token,
+                        access_token  : tokens.access_token,
                         refresh_token : tokens.refresh_token,
-                        expires       : new Date().setSeconds(now + tokens.expires_in)
+                        expires       : now.setSeconds(now.getSeconds() + parseInt(tokens.expires_in))
                     };
 
                     // long-term memory
