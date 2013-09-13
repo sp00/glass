@@ -148,7 +148,7 @@ module.exports = {
                     code            : query.code,
                     client_id       : this.options.clientId,
                     client_secret   : this.options.clientSecret,
-                    redirect_uri    : '???',
+                    redirect_uri    : this.options.callbackUri,
                     grant_type      : 'authorization_code'
                 },
                 json : true
