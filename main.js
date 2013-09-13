@@ -157,7 +157,7 @@ module.exports = {
             console.log('post options', options);
 
             // auth succeeded, get tokens
-            request.post(options, function(err, tokens){
+            request.post(options, function(err, res, tokens){
 
                 if (!err){
 
