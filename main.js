@@ -215,25 +215,19 @@ module.exports = {
     },
 
     /**
-     * update access token
+     * update access tokens
      *
-     * @param {Object} req
-     * @param {String} accessToken
+     * @param {object} tokens
      * @param {Function} callback(err)
      */
-    updateAccessToken: function(req, accessToken, callback){
-
-        // save to session
-        req.session.tokens.access_token = accessToken;
+    updateTokens: function(tokens, callback){
 
         // save to database
-        //db.update('tokens', { refresh_token: req.}, { access_token: accessToken }, function(err){
+        db.update('tokens', { refresh_token: tokens.refresh_token }, { access_token: tokens.access_token}, function(err){
 
-            //callback(err);
+            callback(err);
 
-        //});
-        //
-        callback(undefined);
+        });
 
     },
 
@@ -278,10 +272,13 @@ module.exports = {
                         } else {
 
                             // received refreshed tokens
-                            var refreshedTokens = JSON.parse(body);
+                            var tokens = JSON.parse(body);
+
+                            // save new access token to session
+                            req.session.tokens.access_token = tokens.access_token;
 
                             // save refreshed access token
-                            delegate.updateAccessToken(req, refreshedTokens.access_token, function(err){
+                            delegate.updateTokens(tokens, function(err){
 
                                 if (!err){
 
