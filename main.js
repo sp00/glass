@@ -364,6 +364,8 @@ module.exports = {
 
             this.post(req, options, function(err, res, body){
 
+                console.log('contact inserted', err, res, body);
+
                 callback(err);
 
             });
