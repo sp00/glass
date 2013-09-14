@@ -388,6 +388,42 @@ module.exports = {
     },
     
     // ===================================================================
+    // === Subscriptions =================================================
+    // ===================================================================
+
+    /**
+     * insert a new timeline subscription
+     *
+     * @method insertSubscription
+     * @param {Object} req
+     * @param {Object} subscription
+     * @param {Function} callback(err)
+     */
+    insertSubscription: function(req, subscription, callback){
+
+        if (!this.isValidSubscription(subscription)){
+
+            callback('Invalid subscription provided');
+
+        } else {
+
+            var options = {
+                url     : 'https://www.googleapis.com/mirror/v1/subscriptions',
+                headers : { Authorization: 'Bearer ' + req.session.tokens.access_token },
+                json    : subscription
+            };
+
+            this.post(req, options, function(err, res, body){
+
+                callback(err);
+
+            });
+
+        }
+
+    },
+    
+    // ===================================================================
     // === Validation Routines ===========================================
     // ===================================================================
 
@@ -437,7 +473,55 @@ module.exports = {
 
         return true;
 
-    }
+    },
+
+    /**
+     * determine if subscription object is valid
+     *
+     * {
+     *     kind         : "mirror#subscription",
+     *     id           : string,
+     *     updated      : datetime,
+     *     collection   : string,
+     *     operation    : [
+     *         string
+     *     ],
+     *     callbackUrl  : string,
+     *     verifyToken  : string,
+     *     userToken    : string,
+     *     notification : {
+     *         collection  : string,
+     *         itemId      : string,
+     *         operation   : string,
+     *         userActions : [
+     *             {
+     *                 type    : string,
+     *                 payload : string
+     *             }
+     *         ],
+     *         verifyToken : string,
+     *         userToken   : string
+     *     }
+     * }
+     * 
+     * @method isValidSubscription
+     * @param {Object} subscription
+     * @param {Boolean} existing (default=false)
+     * @return {Boolean}
+     */
+    isValidSubscription: function(subscription, existing){
+
+        if (subscription.callbackUrl === undefined || typeof subscription.callbackUrl !== 'string'){
+            return false;
+        }
+
+        if (subscription.collection === undefined || typeof subscription.collection !== 'string'){
+            return false;
+        }
+
+        return true;
+
+    },
 
 };
 
