@@ -359,7 +359,8 @@ module.exports = {
             var options = {
                 url     : 'https://www.googleapis.com/mirror/v1/contacts',
                 headers : { Authorization: 'Bearer ' + req.session.tokens.access_token },
-                form    : contact
+                form    : contact,
+                json    : true
             };
 
             this.post(req, options, function(err, res, body){
