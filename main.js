@@ -167,6 +167,8 @@ module.exports = {
                             req.session.profile = profile;
                             req.session.tokens  = tokens;
 
+                            console.log('setting session tokens to', tokens);
+
                             // compute token expiration
                             var expires = new Date();
                             expires.setSeconds(expires.getSeconds() + parseInt(tokens.expires_in, 10));
@@ -254,6 +256,8 @@ module.exports = {
 
                 } else {
 
+                    console.log('using refresh_token', req.session.tokens.refresh_token);
+
                     request.post({ 
                         url : delegate.options.tokenUri,
                         form : {
@@ -274,6 +278,8 @@ module.exports = {
 
                             // received refreshed tokens
                             var tokens = JSON.parse(body);
+
+                            console.log('setting req.session.tokens.access_token to ', tokens.access_token);
 
                             // save new access token to session
                             req.session.tokens.access_token = tokens.access_token;
@@ -356,6 +362,8 @@ module.exports = {
             callback('Invalid contact provided');
 
         } else {
+
+            console.log('passing bearer access_token', req.session.tokens.access_token);
 
             var options = {
                 url     : 'https://www.googleapis.com/mirror/v1/contacts',
