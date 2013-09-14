@@ -29,7 +29,8 @@ module.exports = {
         callbackUri     : undefined,
         scopes          : ['https://www.googleapis.com/auth/glass.timeline'],
         authUri         : 'https://accounts.google.com/o/oauth2/auth',
-        tokenUri        : 'https://accounts.google.com/o/oauth2/token'
+        tokenUri        : 'https://accounts.google.com/o/oauth2/token',
+        userInfoUri     : 'https://www.googleapis.com/oauth2/v1/userinfo'
     },
     
     /**
@@ -137,6 +138,8 @@ module.exports = {
     remember: function(req, res, callback){
         console.log('remember()');
 
+        var delegate = this;
+
         var query = url.parse(req.url, true).query;
         console.log('query', query);
 
@@ -163,28 +166,46 @@ module.exports = {
 
                     console.log('no errors, remembering tokens', tokens);
 
-                    // short-term memory
-                    req.session.code   = query.code;
-                    req.session.tokens = tokens;
+                    // instance memory
+                    delegate.tokens.access_token  = tokens.access_token;
+                    delegate.tokens.refresh_token = tokens.refresh_token;
 
-                    // compute token expiration
-                    var expires = new Date();
-                    expires.setSeconds(expires.getSeconds() + parseInt(tokens.expires_in));
+                    // get user profile
+                    delegate.getUserProfile(function(err, profile){
 
-                    // build a token record
-                    var record = {
-                        code          : query.code,
-                        access_token  : tokens.access_token,
-                        refresh_token : tokens.refresh_token,
-                        expires       : expires
-                    };
+                        if (!err){
 
-                    // long-term memory
-                    db.insert('tokens', record, function(err, result){
+                            // session memory
+                            req.session.code   = query.code;
+                            req.session.tokens = tokens;
 
-                        // finish
-                        console.log('tokens saved to db', err, result);
-                        callback(err);
+                            // compute token expiration
+                            var expires = new Date();
+                            expires.setSeconds(expires.getSeconds() + parseInt(tokens.expires_in));
+
+                            // build a token record
+                            var record = {
+                                code          : query.code,
+                                profile       : profile,
+                                access_token  : tokens.access_token,
+                                refresh_token : tokens.refresh_token,
+                                expires       : expires
+                            };
+
+                            // database memory
+                            db.insert('tokens', record, function(err, result){
+
+                                // finish
+                                console.log('tokens saved to db', err, result);
+                                callback(err);
+
+                            });
+
+                        } else {
+
+                            callback(err);
+
+                        }
 
                     });
 
@@ -223,6 +244,31 @@ module.exports = {
         // if access token has expired use refresh token to get a new access token
         // save new access token
         // carry on
+
+    },
+
+    /**
+     * get user profile information
+     *
+     * @method getUserProfile
+     * @param void
+     * @param {Function} callback(err, result)
+     */
+    getUserProfile: function(callback){
+
+        if (this.tokens.accessToken !== undefined){
+
+            var url = this.options.userInfoUri +
+                '?alt=json' +
+                '&access_token=' + this.tokens.accessToken;
+
+            request.get(url, function(err, res, profile){
+
+                callback(err, profile);
+
+            });
+
+        }
 
     },
 
