@@ -249,7 +249,7 @@ module.exports = {
 
         request.get(url, function(err, res, profile){
 
-            callback(err, profile);
+            callback(err, JSON.parse(profile));
 
         });
 
