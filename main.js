@@ -34,16 +34,6 @@ module.exports = {
     },
     
     /**
-     * tokens being used
-     * @var Object
-     * @property tokens
-     */
-    tokens: {
-        accessToken  : undefined,
-        refreshToken : undefined
-    },
-    
-    /**
      * configure google application
      *
      * @method configure
@@ -166,18 +156,15 @@ module.exports = {
 
                     console.log('no errors, remembering tokens', tokens);
 
-                    // instance memory
-                    delegate.tokens.access_token  = tokens.access_token;
-                    delegate.tokens.refresh_token = tokens.refresh_token;
-
                     // get user profile
-                    delegate.getUserProfile(function(err, profile){
+                    delegate.getUserProfile(tokens.access_token, function(err, profile){
 
                         if (!err){
 
                             // session memory
-                            req.session.code   = query.code;
-                            req.session.tokens = tokens;
+                            req.session.code    = query.code;
+                            req.session.profile = profile;
+                            req.session.tokens  = tokens;
 
                             // compute token expiration
                             var expires = new Date();
@@ -251,24 +238,20 @@ module.exports = {
      * get user profile information
      *
      * @method getUserProfile
-     * @param void
+     * @param {String} accessToken
      * @param {Function} callback(err, result)
      */
-    getUserProfile: function(callback){
+    getUserProfile: function(accessToken, callback){
 
-        if (this.tokens.accessToken !== undefined){
+        var url = this.options.userInfoUri +
+            '?alt=json' +
+            '&access_token=' + accessToken;
 
-            var url = this.options.userInfoUri +
-                '?alt=json' +
-                '&access_token=' + this.tokens.accessToken;
+        request.get(url, function(err, res, profile){
 
-            request.get(url, function(err, res, profile){
+            callback(err, profile);
 
-                callback(err, profile);
-
-            });
-
-        }
+        });
 
     },
 
