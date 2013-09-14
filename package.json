@@ -1,7 +1,7 @@
 {
   "name": "glass",
   "description": "A think Node.js wrapper for Google Glass applications running under Express",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "Toby Miller <tobius.miller@gmail.com>",
   "repository": {
     "type": "git",
