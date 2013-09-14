@@ -174,7 +174,7 @@ module.exports = {
                             // build a token record
                             var record = {
                                 code          : query.code,
-                                //profile       : profile,
+                                profile       : profile,
                                 access_token  : tokens.access_token,
                                 refresh_token : tokens.refresh_token,
                                 expires       : expires
