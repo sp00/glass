@@ -167,8 +167,6 @@ module.exports = {
                             req.session.profile = profile;
                             req.session.tokens  = tokens;
 
-                            console.log('setting session tokens to', tokens);
-
                             // compute token expiration
                             var expires = new Date();
                             expires.setSeconds(expires.getSeconds() + parseInt(tokens.expires_in, 10));
@@ -256,6 +254,7 @@ module.exports = {
 
                 } else {
 
+                    // never hit
                     console.log('using refresh_token', req.session.tokens.refresh_token);
 
                     request.post({ 
@@ -309,8 +308,17 @@ module.exports = {
 
             } else {
 
-                // success
-                callback(err, res, body);
+                if (!err && typeof body !== 'string' && body.error !== undefined && body.error.message !== undefined){
+
+                    // error
+                    callback(body.error.message, res, body);
+
+                } else {
+
+                    // success
+                    callback(err, res, body);
+
+                }
 
             }
 
