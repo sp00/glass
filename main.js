@@ -371,8 +371,6 @@ module.exports = {
 
         } else {
 
-            console.log('passing bearer access_token', req.session.tokens.access_token);
-
             var options = {
                 url     : 'https://www.googleapis.com/mirror/v1/contacts',
                 headers : { Authorization: 'Bearer ' + req.session.tokens.access_token },
@@ -380,11 +378,6 @@ module.exports = {
             };
 
             this.post(req, options, function(err, res, body){
-
-                console.log('contact inserted');
-                console.log('err', err);
-                console.log('res', res);
-                console.log('body', body);
 
                 callback(err);
 
