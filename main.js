@@ -373,7 +373,59 @@ module.exports = {
 
         }
 
-    }
+    },
     
+    // ===================================================================
+    // === Validation Routines ===========================================
+    // ===================================================================
+
+    /**
+     * determine if contact object is valid
+     *
+     * {
+     *     kind           : "mirror#contact",
+     *     source         : string,
+     *     id             : string,
+     *     displayName    : string,
+     *     imageUrls      : [
+     *         string
+     *     ],
+     *     type           : string,
+     *     acceptTypes    : [
+     *         string
+     *     ],
+     *     phoneNumber    : string,
+     *     priority       : unsigned integer,
+     *     acceptCommands : [
+     *         {
+     *             type : string
+     *         }
+     *     ],
+     *     speakableName  : string
+     * }
+     * 
+     * @method isValidContact
+     * @param {Object} contact
+     * @param {Boolean} existing (default=false)
+     * @return {Boolean}
+     */
+    isValidContact: function(contact, existing){
+
+        if (contact.id === undefined || typeof contact.id !== 'string'){
+            return false;
+        }
+
+        if (contact.displayName === undefined || typeof contact.displayName !== 'string'){
+            return false;
+        }
+
+        if (contact.imageUrls === undefined || !Array.isArray(contact.imageUrls) || contact.imageUrls.length === 0){
+            return false;
+        }
+
+        return true;
+
+    }
+
 };
 
