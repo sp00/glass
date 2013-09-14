@@ -14,7 +14,7 @@ var db = require('db'),
 module.exports = {
 
     // ===================================================================
-    // === Setup -========================================================
+    // === Setup =========================================================
     // ===================================================================
 
     /**
@@ -23,16 +23,23 @@ module.exports = {
      * @property options
      */
     options: {
-        apiKey          : undefined,
-        clientId        : undefined,
-        clientSecret    : undefined,
-        callbackUri     : undefined,
-        scopes          : ['https://www.googleapis.com/auth/glass.timeline'],
-        authUri         : 'https://accounts.google.com/o/oauth2/auth',
-        tokenUri        : 'https://accounts.google.com/o/oauth2/token',
-        userInfoUri     : 'https://www.googleapis.com/oauth2/v1/userinfo'
+        apiKey           : undefined,
+        clientId         : undefined,
+        clientSecret     : undefined,
+        callbackUri      : undefined,
+        scopes           : [
+            'https://www.googleapis.com/auth/userinfo.profile',
+            'https://www.googleapis.com/auth/glass.timeline'
+        ],
+        authUri          : 'https://accounts.google.com/o/oauth2/auth',
+        tokenUri         : 'https://accounts.google.com/o/oauth2/token',
+        userInfoUri      : 'https://www.googleapis.com/oauth2/v1/userinfo',
+        contactsUri      : 'https://www.googleapis.com/mirror/v1/contacts',
+        itemsUri         : 'https://www.googleapis.com/mirror/v1/timeline',
+        locationsUri     : 'https://www.googleapis.com/mirror/v1/locations',
+        subscriptionsUri : 'https://www.googleapis.com/mirror/v1/subscriptions'
     },
-    
+
     /**
      * configure google application
      *
@@ -90,27 +97,6 @@ module.exports = {
     },
 
     /**
-     * get user profile information
-     *
-     * @method getUserProfile
-     * @param {String} accessToken
-     * @param {Function} callback(err, result)
-     */
-    getUserProfile: function(accessToken, callback){
-
-        var url = this.options.userInfoUri +
-            '?alt=json' +
-            '&access_token=' + accessToken;
-
-        request.get(url, function(err, res, profile){
-
-            callback(err, JSON.parse(profile));
-
-        });
-
-    },
-
-    /**
      * connect session to google application
      *
      * note: fire this method from your "install/authorize" express route
@@ -147,12 +133,9 @@ module.exports = {
      * @param {Function} callback(err)
      */
     remember: function(req, res, callback){
-        console.log('remember()');
 
         var delegate = this;
-
         var query = url.parse(req.url, true).query;
-        console.log('query', query);
 
         if (query.code !== undefined){
 
@@ -168,14 +151,11 @@ module.exports = {
                 },
                 json : true
             };
-            console.log('post options', options);
 
             // auth succeeded, get tokens
             request.post(options, function(err, res, tokens){
 
                 if (!err){
-
-                    console.log('no errors, remembering tokens', tokens);
 
                     // get user profile
                     delegate.getUserProfile(tokens.access_token, function(err, profile){
@@ -189,12 +169,12 @@ module.exports = {
 
                             // compute token expiration
                             var expires = new Date();
-                            expires.setSeconds(expires.getSeconds() + parseInt(tokens.expires_in));
+                            expires.setSeconds(expires.getSeconds() + parseInt(tokens.expires_in, 10));
 
                             // build a token record
                             var record = {
                                 code          : query.code,
-                                profile       : profile,
+                                //profile       : profile,
                                 access_token  : tokens.access_token,
                                 refresh_token : tokens.refresh_token,
                                 expires       : expires
@@ -204,7 +184,6 @@ module.exports = {
                             db.insert('tokens', record, function(err, result){
 
                                 // finish
-                                console.log('tokens saved to db', err, result);
                                 callback(err);
 
                             });
@@ -220,7 +199,6 @@ module.exports = {
                 } else {
 
                     // post failed
-                    console.log('post failed');
                     callback(err);
 
                 }
@@ -230,7 +208,6 @@ module.exports = {
         } else {
 
             // authentication failed
-            console.log('auth failed');
             callback('Authentication failed');
 
         }
@@ -238,22 +215,165 @@ module.exports = {
     },
 
     /**
-     * reconnect session to google application
+     * update access token
      *
-     * @method reconnect
-     * @param {String} authCode
+     * @param {Object} req
+     * @param {String} accessToken
      * @param {Function} callback(err)
      */
-    reconnect: function(authCode, callback){
+    updateAccessToken: function(req, accessToken, callback){
 
-        // get user id
-        // use user id to find access token
-        // confirm that access token has not expired
-        // if access token has expired use refresh token to get a new access token
-        // save new access token
-        // carry on
+        // save to session
+        req.session.tokens.access_token = accessToken;
+
+        // save to database
+        //db.update('tokens', { refresh_token: req.}, { access_token: accessToken }, function(err){
+
+            //callback(err);
+
+        //});
+        //
+        callback(undefined);
+
+    },
+
+    /**
+     * perform a request post (and refresh access token if necessary)
+     *
+     * @param {Object} req
+     * @param {Object} options
+     * @param {Function} callback
+     * @param {Boolean} refresh (default=false)
+     */
+    post: function(req, options, callback, refresh){
+
+        var delegate = this;
+
+        request.post(options, function(err, res, body){
+
+            if (body === 'Invalid Credentials'){
+
+                if (refresh){
+
+                    // only attempt to refresh once
+                    callback(err, res, body);
+
+                } else {
+
+                    request.post({ 
+                        url : delegate.options.tokenUri,
+                        form : {
+                            client_id     : delegate.options.clientId,
+                            client_secret : delegate.options.clientSecret,
+                            refresh_token : req.session.tokens.refresh_token,
+                            grant_type    : 'refresh_token'
+                        }
+                    }, function(err, res, body){
+
+                        if (err){
+
+                            // failed
+                            callback(err, res, body);
+
+                        } else {
+
+                            // received refreshed tokens
+                            var refreshedTokens = JSON.parse(body);
+
+                            // save refreshed access token
+                            delegate.updateAccessToken(req, refreshedTokens.access_token, function(err){
+
+                                if (!err){
+
+                                    // try again
+                                    delegate.repost(req, options, callback, true);
+
+                                } else {
+
+                                    // failed again
+                                    callback(err, res, body);
+
+                                }
+
+                            });
+
+                        }
+
+                    });
+
+                }
+
+            } else {
+
+                // success
+                callback(err, res, body);
+
+            }
+
+        });
+
+    },
+
+    // ===================================================================
+    // === Users =========================================================
+    // ===================================================================
+
+    /**
+     * get user profile information
+     *
+     * @method getUserProfile
+     * @param {String} accessToken
+     * @param {Function} callback(err, result)
+     */
+    getUserProfile: function(accessToken, callback){
+
+        var url = this.options.userInfoUri +
+            '?alt=json' +
+            '&access_token=' + accessToken;
+
+        request.get(url, function(err, res, profile){
+
+            callback(err, JSON.parse(profile));
+
+        });
+
+    },
+
+    // ===================================================================
+    // === Contacts ======================================================
+    // ===================================================================
+
+    /**
+     * insert a new timeline contact
+     *
+     * @method insertContact
+     * @param {Object} req
+     * @param {Object} contact
+     * @param {Function} callback(err)
+     */
+    insertContact: function(req, contact, callback){
+
+        if (!this.isValidContact(contact)){
+
+            callback('Invalid contact provided');
+
+        } else {
+
+            var options = {
+                url     : 'https://www.googleapis.com/mirror/v1/contacts',
+                headers : { Authorization: 'Bearer ' + req.session.tokens.access_token },
+                form    : contact
+            };
+
+            this.post(req, options, function(err, res, body){
+
+                callback(err);
+
+            });
+
+        }
 
     }
-
+    
 };
 
