@@ -148,7 +148,8 @@ module.exports = {
                     client_secret   : this.options.clientSecret,
                     redirect_uri    : this.options.callbackUri,
                     grant_type      : 'authorization_code'
-                }
+                },
+                json : true
             };
 
             // auth succeeded, get tokens
@@ -260,7 +261,8 @@ module.exports = {
                             client_secret : delegate.options.clientSecret,
                             refresh_token : req.session.tokens.refresh_token,
                             grant_type    : 'refresh_token'
-                        }
+                        },
+                        json : true
                     }, function(err, res, body){
 
                         if (err){
@@ -358,7 +360,8 @@ module.exports = {
             var options = {
                 url     : 'https://www.googleapis.com/mirror/v1/contacts',
                 headers : { Authorization: 'Bearer ' + req.session.tokens.access_token },
-                json    : contact
+                form    : contact,
+                json    : true
             };
 
             this.post(req, options, function(err, res, body){
