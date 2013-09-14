@@ -142,7 +142,7 @@ module.exports = {
             // prepare token request
             var options = {
                 uri  : this.options.tokenUri,
-                json : {
+                form : {
                     code            : query.code,
                     client_id       : this.options.clientId,
                     client_secret   : this.options.clientSecret,
@@ -358,13 +358,15 @@ module.exports = {
             var options = {
                 url     : 'https://www.googleapis.com/mirror/v1/contacts',
                 headers : { Authorization: 'Bearer ' + req.session.tokens.access_token },
-                form    : contact,
-                json    : true
+                json    : contact
             };
 
             this.post(req, options, function(err, res, body){
 
-                console.log('contact inserted', err, res, body);
+                console.log('contact inserted');
+                console.log('err', err);
+                console.log('res', res);
+                console.log('body', body);
 
                 callback(err);
 
