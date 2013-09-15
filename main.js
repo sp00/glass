@@ -432,6 +432,38 @@ module.exports = {
     // ===================================================================
 
     /**
+     * insert a new timeline item
+     *
+     * @method insertItem
+     * @param {Object} req
+     * @param {Object} item
+     * @param {Function} callback(err)
+     */
+    insertItem: function(req, item, callback){
+
+        if (!this.isValidItem(item)){
+
+            callback('Invalid item provided');
+
+        } else {
+
+            var options = {
+                url     : 'https://www.googleapis.com/mirror/v1/timeline',
+                headers : { Authorization: 'Bearer ' + req.session.tokens.access_token },
+                json    : item
+            };
+
+            this.post(req, options, function(err, res, body){
+
+                callback(err);
+
+            });
+
+        }
+
+    },
+    
+    /**
      * get existing timeline item 
      *
      * @method getItem
@@ -606,6 +638,73 @@ module.exports = {
         if (contact.imageUrls === undefined || !Array.isArray(contact.imageUrls) || contact.imageUrls.length === 0){
             return false;
         }
+
+        return true;
+
+    },
+
+    /**
+     * determine if item object is valid
+     *
+     * {
+     *     kind          : "mirror#timelineItem",
+     *     id            : string,
+     *     sourceItemId  : string,
+     *     canonicalUrl  : string,
+     *     bundleId      : string,
+     *     isBundleCover : boolean,
+     *     selfLink      : string,
+     *     created       : datetime,
+     *     updated       : datetime,
+     *     displayTime   : datetime,
+     *     isPinned      : boolean,
+     *     pinScore      : integer,
+     *     isDeleted     : boolean,
+     *     etag          : etag,
+     *     creator       : contacts Resource,
+     *     recipients    : [
+     *         contacts Resource
+     *     ],
+     *     inReplyTo     : string,
+     *     title         : string,
+     *     text          : string,
+     *     html          : string,
+     *     htmlPages     : [
+     *         string
+     *     ],
+     *     speakableType : string,
+     *     speakableText : string,
+     *     attachments   : [
+     *         timeline.attachments Resource
+     *     ],
+     *     location      : locations Resource,
+     *     menuItems     : [
+     *         {
+     *             id                 : string,
+     *             action             : string,
+     *             values             : [
+     *                 {
+     *                     state       : string,
+     *                     displayName : string,
+     *                     iconUrl     : string
+     *                 }
+     *             ],
+     *             removeWhenSelected : boolean,
+     *             payload            : string
+     *         }
+     *     ],
+     *     notification  : {
+     *         level        : string,
+     *         deliveryTime : datetime
+     *     }
+     * }
+     * 
+     * @method isValidItem
+     * @param {Object} item
+     * @param {Boolean} existing (default=false)
+     * @return {Boolean}
+     */
+    isValidItem: function(item, existing){
 
         return true;
 
