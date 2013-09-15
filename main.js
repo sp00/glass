@@ -440,6 +440,34 @@ module.exports = {
     },
 
     // ===================================================================
+    // === Attachments ===================================================
+    // ===================================================================
+
+    /**
+     * get existing timeline item attachment
+     *
+     * @method getAttachment
+     * @param {Object} req
+     * @param {String} itemId
+     * @param {String} attachmentId
+     * @param {Function} callback(err, item)
+     */
+    getAttachment: function(req, itemId, attachmentId, callback){
+
+        var options = {
+            url     : 'https://www.googleapis.com/mirror/v1/timeline/' + itemId + '/attachments/' + attachmentId,
+            headers : { Authorization: 'Bearer ' + req.session.tokens.access_token }
+        };
+
+        this.get(req, options, function(err, res, body){
+
+            callback(err, body);
+
+        });
+
+    },
+
+    // ===================================================================
     // === Subscriptions =================================================
     // ===================================================================
 
