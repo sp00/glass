@@ -250,11 +250,14 @@ module.exports = {
 
         request.get(options, function(err, res, body){
 
-            /*
+            if (/^\s*{/.test(body)){
+                body = JSON.parse(body);
+            }
+
             console.log('get:request.get:err', err);
             console.log('get:request.get:res', res);
             console.log('get:request.get:body', body);
-            */
+
             console.log('err', err);
             console.log('typeof body', typeof body);
             console.log('body.error', body.error);
