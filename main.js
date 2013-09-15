@@ -224,9 +224,24 @@ module.exports = {
     updateToken: function(refreshToken, accessToken, callback){
 
         // save to database
-        db.upsert('tokens', { refresh_token: refreshToken }, { access_token: accessToken }, function(err){
+        db.query('tokens', { refresh_token: refreshToken }, function(err, tokens){
 
-            callback(err);
+            if (!err){
+
+                var token = tokens[0];
+                token.access_token = accessToken;
+
+                db.update('tokens', { refresh_token: refreshToken }, token, function(err){
+
+                    callback(err);
+
+                });
+
+            } else {
+
+                callback(err);
+
+            }
 
         });
 
