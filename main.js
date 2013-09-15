@@ -223,6 +223,8 @@ module.exports = {
      */
     updateToken: function(refreshToken, accessToken, callback){
 
+        console.log('updating token (refresh/access)', refreshToken, accessToken);
+
         // save to database
         db.query('tokens', { refresh_token: refreshToken }, function(err, tokens){
 
