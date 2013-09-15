@@ -467,6 +467,47 @@ module.exports = {
 
     },
 
+    /**
+     * get existing timeline item attachment as raw image data
+     *
+     * @method getRawAttachment
+     * @param {Object} req
+     * @param {String} itemId
+     * @param {String} attachmentId
+     * @param {Function} callback(err, image)
+     */
+    getRawAttachment: function(req, itemId, attachmentId, callback){
+
+        var delegate = this;
+
+        this.getAttachment(req, itemId, attachmentId, function(err, item){
+
+            if (!err){
+
+                var options = {
+                    url      : item.contentUrl,
+                    encoding : 'binary',
+                    headers  : {
+                        Authorization : 'Bearer ' + req.session.tokens.access_token
+                    }
+                };
+
+                delegate.get(options, function(err, res, body){
+
+                    callback(err, body);
+
+                });
+                
+            } else {
+
+                callback(err, item);
+
+            }
+
+        });
+
+    },
+
     // ===================================================================
     // === Subscriptions =================================================
     // ===================================================================
