@@ -265,7 +265,7 @@ module.exports = {
 
             if (!err && typeof body !== 'string' && body.error !== undefined && body.error.message !== undefined){
 
-                err = body.message;
+                err = body.error.message;
 
             }
 
