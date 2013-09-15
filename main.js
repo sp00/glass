@@ -241,15 +241,26 @@ module.exports = {
      */
     get: function(req, options, callback, refresh){
 
+        console.log('get:req', req);
+        console.log('get:options', options);
+        console.log('get:callback', callback);
+        console.log('get:refresh', refresh);
+
         var delegate = this;
 
         request.get(options, function(err, res, body){
+
+            console.log('get:request.get:err', err);
+            console.log('get:request.get:res', res);
+            console.log('get:request.get:body', body);
 
             if (!err && typeof body !== 'string' && body.error !== undefined && body.error.message !== undefined){
 
                 err = body.error.message;
 
             }
+
+            console.log('insider err', err);
 
             if (err === 'Invalid Credentials'){
 
@@ -297,7 +308,7 @@ module.exports = {
                                 if (!err){
 
                                     // try again
-                                    delegate.repost(req, options, callback, true);
+                                    delegate.get(req, options, callback, true);
 
                                 } else {
 
@@ -382,7 +393,7 @@ module.exports = {
                                 if (!err){
 
                                     // try again
-                                    delegate.repost(req, options, callback, true);
+                                    delegate.post(req, options, callback, true);
 
                                 } else {
 
