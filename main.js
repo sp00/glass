@@ -233,44 +233,28 @@ module.exports = {
     },
 
     /**
-     * perform a request get (and refresh access token if necessary)
+     * perform a request (and refresh access token if necessary)
      *
      * @param {Object} req
      * @param {Object} options
      * @param {Function} callback
      * @param {Boolean} refresh (default=false)
      */
-    get: function(req, options, callback, refresh){
-
-        console.log('get:req', req);
-        console.log('get:options', options);
-        console.log('get:callback', callback);
-        console.log('get:refresh', refresh);
+    request: function(req, options, callback, refresh){
 
         var delegate = this;
 
-        request.get(options, function(err, res, body){
+        request(options, function(err, res, body){
 
             if (/^\s*{/.test(body)){
                 body = JSON.parse(body);
             }
-
-            console.log('get:request.get:err', err);
-            console.log('get:request.get:res', res);
-            console.log('get:request.get:body', body);
-
-            console.log('err', err);
-            console.log('typeof body', typeof body);
-            console.log('body.error', body.error);
-            console.log('body.error.message', body.error.message);
 
             if (!err && typeof body !== 'string' && body.error !== undefined && body.error.message !== undefined){
 
                 err = body.error.message;
 
             }
-
-            console.log('insider err', err);
 
             if (err === 'Invalid Credentials'){
 
@@ -281,9 +265,7 @@ module.exports = {
 
                 } else {
 
-                    // never hit
-                    console.log('get: using refresh_token', req.session.tokens.refresh_token);
-
+                    // refresh token
                     var refreshOptions = {
                         url : delegate.options.tokenUri,
                         form : {
@@ -308,7 +290,7 @@ module.exports = {
                                 if (!err){
 
                                     // try again
-                                    delegate.get(req, options, callback, true);
+                                    delegate.request(req, options, callback, true);
 
                                 } else {
 
@@ -340,7 +322,22 @@ module.exports = {
     },
 
     /**
-     * perform a request post (and refresh access token if necessary)
+     * perform a get (and refresh access token if necessary)
+     *
+     * @param {Object} req
+     * @param {Object} options
+     * @param {Function} callback
+     * @param {Boolean} refresh (default=false)
+     */
+    get: function(req, options, callback, refresh){
+
+        options.method = 'GET';
+        this.request(req, options, callback, refresh);
+
+    },
+
+    /**
+     * perform a post (and refresh access token if necessary)
      *
      * @param {Object} req
      * @param {Object} options
@@ -349,88 +346,8 @@ module.exports = {
      */
     post: function(req, options, callback, refresh){
 
-        var delegate = this;
-
-        request.post(options, function(err, res, body){
-
-            if (body === 'Invalid Credentials'){
-
-                if (refresh){
-
-                    // only attempt to refresh once
-                    callback(err, res, body);
-
-                } else {
-
-                    // never hit
-                    console.log('using refresh_token', req.session.tokens.refresh_token);
-
-                    request.post({ 
-                        url : delegate.options.tokenUri,
-                        form : {
-                            client_id     : delegate.options.clientId,
-                            client_secret : delegate.options.clientSecret,
-                            refresh_token : req.session.tokens.refresh_token,
-                            grant_type    : 'refresh_token'
-                        },
-                        json : true
-                    }, function(err, res, body){
-
-                        if (err){
-
-                            // failed
-                            callback(err, res, body);
-
-                        } else {
-
-                            // received refreshed tokens
-                            var tokens = JSON.parse(body);
-
-                            console.log('setting req.session.tokens.access_token to ', tokens.access_token);
-
-                            // save new access token to session
-                            req.session.tokens.access_token = tokens.access_token;
-
-                            // save refreshed access token
-                            delegate.updateToken(tokens, function(err){
-
-                                if (!err){
-
-                                    // try again
-                                    delegate.post(req, options, callback, true);
-
-                                } else {
-
-                                    // failed again
-                                    callback(err, res, body);
-
-                                }
-
-                            });
-
-                        }
-
-                    });
-
-                }
-
-            } else {
-
-                if (!err && typeof body !== 'string' && body.error !== undefined && body.message !== undefined){
-
-                    // error
-                    callback(body.message, res, body);
-
-                } else {
-
-                    // success
-                    callback(err, res, body);
-
-                }
-
-            }
-
-        });
+        options.method = 'POST';
+        this.request(req, options, callback, refresh);
 
     },
 
