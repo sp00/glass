@@ -304,6 +304,8 @@ module.exports = {
                         } else {
 
                             // received refreshed tokens
+                            console.log('before parse: unexpected token o?', body);
+                            console.log('after parse: unexpected token o?', JSON.parse(body));
                             var tokens = JSON.parse(body);
 
                             console.log('get: setting req.session.tokens.access_token to ', tokens.access_token);
