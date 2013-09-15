@@ -254,9 +254,9 @@ module.exports = {
             console.log('get:request.get:res', res);
             console.log('get:request.get:body', body);
 
-            if (!err && typeof body !== 'string' && body.error !== undefined && body.error.message !== undefined){
+            if (!err && typeof body !== 'string' && body.error !== undefined && body.message !== undefined){
 
-                err = body.error.message;
+                err = body.message;
 
             }
 
@@ -412,10 +412,10 @@ module.exports = {
 
             } else {
 
-                if (!err && typeof body !== 'string' && body.error !== undefined && body.error.message !== undefined){
+                if (!err && typeof body !== 'string' && body.error !== undefined && body.message !== undefined){
 
                     // error
-                    callback(body.error.message, res, body);
+                    callback(body.message, res, body);
 
                 } else {
 
