@@ -232,6 +232,101 @@ module.exports = {
     },
 
     /**
+     * perform a request get (and refresh access token if necessary)
+     *
+     * @param {Object} req
+     * @param {Object} options
+     * @param {Function} callback
+     * @param {Boolean} refresh (default=false)
+     */
+    get: function(req, options, callback, refresh){
+
+        var delegate = this;
+
+        request.get(options, function(err, res, body){
+
+            if (body === 'Invalid Credentials'){
+
+                if (refresh){
+
+                    // only attempt to refresh once
+                    callback(err, res, body);
+
+                } else {
+
+                    // never hit
+                    console.log('get: using refresh_token', req.session.tokens.refresh_token);
+
+                    request.post({ 
+                        url : delegate.options.tokenUri,
+                        form : {
+                            client_id     : delegate.options.clientId,
+                            client_secret : delegate.options.clientSecret,
+                            refresh_token : req.session.tokens.refresh_token,
+                            grant_type    : 'refresh_token'
+                        },
+                        json : true
+                    }, function(err, res, body){
+
+                        if (err){
+
+                            // failed
+                            callback(err, res, body);
+
+                        } else {
+
+                            // received refreshed tokens
+                            var tokens = JSON.parse(body);
+
+                            console.log('get: setting req.session.tokens.access_token to ', tokens.access_token);
+
+                            // save new access token to session
+                            req.session.tokens.access_token = tokens.access_token;
+
+                            // save refreshed access token
+                            delegate.updateTokens(tokens, function(err){
+
+                                if (!err){
+
+                                    // try again
+                                    delegate.repost(req, options, callback, true);
+
+                                } else {
+
+                                    // failed again
+                                    callback(err, res, body);
+
+                                }
+
+                            });
+
+                        }
+
+                    });
+
+                }
+
+            } else {
+
+                if (!err && typeof body !== 'string' && body.error !== undefined && body.error.message !== undefined){
+
+                    // error
+                    callback(body.error.message, res, body);
+
+                } else {
+
+                    // success
+                    callback(err, res, body);
+
+                }
+
+            }
+
+        });
+
+    },
+
+    /**
      * perform a request post (and refresh access token if necessary)
      *
      * @param {Object} req
@@ -387,6 +482,33 @@ module.exports = {
 
     },
     
+    // ===================================================================
+    // === Items =========================================================
+    // ===================================================================
+
+    /**
+     * get existing timeline item 
+     *
+     * @method getItem
+     * @param {Object} req
+     * @param {String} itemId
+     * @param {Function} callback(err, item)
+     */
+    getItem: function(req, itemId, callback){
+
+        var options = {
+            url     : 'https://www.googleapis.com/mirror/v1/timeline/' + itemId,
+            headers : { Authorization: 'Bearer ' + req.session.tokens.access_token }
+        };
+
+        this.get(req, options, function(err, res, body){
+
+            callback(err, body);
+
+        });
+
+    },
+
     // ===================================================================
     // === Subscriptions =================================================
     // ===================================================================
