@@ -450,7 +450,7 @@ module.exports = {
      * @param {Object} req
      * @param {String} itemId
      * @param {String} attachmentId
-     * @param {Function} callback(err, item)
+     * @param {Function} callback(err, attachment)
      */
     getAttachment: function(req, itemId, attachmentId, callback){
 
@@ -492,7 +492,7 @@ module.exports = {
                     }
                 };
 
-                delegate.get(options, function(err, res, body){
+                delegate.get(req, options, function(err, res, body){
 
                     callback(err, attachment, body);
 
