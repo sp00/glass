@@ -246,7 +246,7 @@ module.exports = {
 
         request(options, function(err, res, body){
 
-            if (/^\s*{/.test(body)){
+            if (/^\s*\{/.test(body)){
                 body = JSON.parse(body);
             }
 
