@@ -245,11 +245,17 @@ module.exports = {
 
         request.get(options, function(err, res, body){
 
-            if (body === 'Invalid Credentials'){
+            if (!err && typeof body !== 'string' && body.error !== undefined && body.error.message !== undefined){
+
+                err = body.error.message;
+
+            }
+
+            if (err === 'Invalid Credentials'){
 
                 if (refresh){
 
-                    // only attempt to refresh once
+                    // we only attempt to refresh once
                     callback(err, res, body);
 
                 } else {
@@ -257,7 +263,7 @@ module.exports = {
                     // never hit
                     console.log('get: using refresh_token', req.session.tokens.refresh_token);
 
-                    request.post({ 
+                    var refreshOptions = {
                         url : delegate.options.tokenUri,
                         form : {
                             client_id     : delegate.options.clientId,
@@ -266,7 +272,9 @@ module.exports = {
                             grant_type    : 'refresh_token'
                         },
                         json : true
-                    }, function(err, res, body){
+                    };
+
+                    request.post(refreshOptions, function(err, res, body){
 
                         if (err){
 
@@ -308,17 +316,7 @@ module.exports = {
 
             } else {
 
-                if (!err && typeof body !== 'string' && body.error !== undefined && body.error.message !== undefined){
-
-                    // error
-                    callback(body.error.message, res, body);
-
-                } else {
-
-                    // success
-                    callback(err, res, body);
-
-                }
+                callback(err, res, body);
 
             }
 
