@@ -401,7 +401,7 @@ module.exports = {
      * @method insertContact
      * @param {Object} req
      * @param {Object} contact
-     * @param {Function} callback(err)
+     * @param {Function} callback(err, contact)
      */
     insertContact: function(req, contact, callback){
 
@@ -419,7 +419,7 @@ module.exports = {
 
             this.post(req, options, function(err, res, body){
 
-                callback(err);
+                callback(err, body);
 
             });
 
@@ -437,7 +437,7 @@ module.exports = {
      * @method insertItem
      * @param {Object} req
      * @param {Object} item
-     * @param {Function} callback(err)
+     * @param {Function} callback(err, item)
      */
     insertItem: function(req, item, callback){
 
@@ -455,7 +455,7 @@ module.exports = {
 
             this.post(req, options, function(err, res, body){
 
-                callback(err);
+                callback(err, body);
 
             });
 
@@ -565,7 +565,7 @@ module.exports = {
      * @method insertSubscription
      * @param {Object} req
      * @param {Object} subscription
-     * @param {Function} callback(err)
+     * @param {Function} callback(err, subscription)
      */
     insertSubscription: function(req, subscription, callback){
 
@@ -583,7 +583,7 @@ module.exports = {
 
             this.post(req, options, function(err, res, body){
 
-                callback(err);
+                callback(err, body);
 
             });
 
