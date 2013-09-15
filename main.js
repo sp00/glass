@@ -233,7 +233,7 @@ module.exports = {
                 var token = tokens[0];
                 token.access_token = accessToken;
 
-                db.update('tokens', { refresh_token: refreshToken }, token, function(err){
+                db.update('tokens', { _id: token._id }, token, function(err){
 
                     callback(err);
 
@@ -339,32 +339,30 @@ module.exports = {
     },
 
     /**
-     * perform a get (and refresh access token if necessary)
+     * perform a get request
      *
      * @param {Object} req
      * @param {Object} options
      * @param {Function} callback
-     * @param {Boolean} refresh (default=false)
      */
-    get: function(req, options, callback, refresh){
+    get: function(req, options, callback){
 
         options.method = 'GET';
-        this.request(req, options, callback, refresh);
+        this.request(req, options, callback);
 
     },
 
     /**
-     * perform a post (and refresh access token if necessary)
+     * perform a post request
      *
      * @param {Object} req
      * @param {Object} options
      * @param {Function} callback
-     * @param {Boolean} refresh (default=false)
      */
-    post: function(req, options, callback, refresh){
+    post: function(req, options, callback){
 
         options.method = 'POST';
-        this.request(req, options, callback, refresh);
+        this.request(req, options, callback);
 
     },
 
