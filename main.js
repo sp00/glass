@@ -215,15 +215,16 @@ module.exports = {
     },
 
     /**
-     * update access tokens
+     * update access token
      *
-     * @param {object} tokens
+     * @param {String} refreshToken
+     * @param {String} accessToken
      * @param {Function} callback(err)
      */
-    updateTokens: function(tokens, callback){
+    updateToken: function(refreshToken, accessToken, callback){
 
         // save to database
-        db.update('tokens', { refresh_token: tokens.refresh_token }, { access_token: tokens.access_token}, function(err){
+        db.update('tokens', { refresh_token: refreshToken }, { access_token: accessToken }, function(err){
 
             callback(err);
 
@@ -296,25 +297,13 @@ module.exports = {
 
                     request.post(refreshOptions, function(err, res, body){
 
-                        if (err){
-
-                            // failed
-                            callback(err, res, body);
-
-                        } else {
-
-                            // received refreshed tokens
-                            console.log('typeof body', typeof body);
-                            console.log('before parse: unexpected token o?', body);
-                            var tokens = JSON.parse(body);
-
-                            console.log('get: setting req.session.tokens.access_token to ', tokens.access_token);
+                        if (body.access_token !== undefined) {
 
                             // save new access token to session
-                            req.session.tokens.access_token = tokens.access_token;
+                            req.session.tokens.access_token = body.access_token;
 
                             // save refreshed access token
-                            delegate.updateTokens(tokens, function(err){
+                            delegate.updateToken(req.session.tokens.refresh_token, body.access_token, function(err){
 
                                 if (!err){
 
@@ -329,6 +318,10 @@ module.exports = {
                                 }
 
                             });
+
+                        } else {
+
+                            callback(err, res, body);
 
                         }
 
@@ -399,7 +392,7 @@ module.exports = {
                             req.session.tokens.access_token = tokens.access_token;
 
                             // save refreshed access token
-                            delegate.updateTokens(tokens, function(err){
+                            delegate.updateToken(tokens, function(err){
 
                                 if (!err){
 
