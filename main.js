@@ -250,11 +250,17 @@ module.exports = {
 
         request.get(options, function(err, res, body){
 
+            /*
             console.log('get:request.get:err', err);
             console.log('get:request.get:res', res);
             console.log('get:request.get:body', body);
+            */
+            console.log('err', err);
+            console.log('typeof body', typeof body);
+            console.log('body.error', body.error);
+            console.log('body.error.message', body.error.message);
 
-            if (!err && typeof body !== 'string' && body.error !== undefined && body.message !== undefined){
+            if (!err && typeof body !== 'string' && body.error !== undefined && body.error.message !== undefined){
 
                 err = body.message;
 
