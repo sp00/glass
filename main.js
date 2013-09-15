@@ -470,22 +470,22 @@ module.exports = {
     /**
      * get existing timeline item attachment as raw image data
      *
-     * @method getRawAttachment
+     * @method getAttachmentImage
      * @param {Object} req
      * @param {String} itemId
      * @param {String} attachmentId
-     * @param {Function} callback(err, image)
+     * @param {Function} callback(err, attachment, image)
      */
-    getRawAttachment: function(req, itemId, attachmentId, callback){
+    getAttachmentImage: function(req, itemId, attachmentId, callback){
 
         var delegate = this;
 
-        this.getAttachment(req, itemId, attachmentId, function(err, item){
+        this.getAttachment(req, itemId, attachmentId, function(err, attachment){
 
             if (!err){
 
                 var options = {
-                    url      : item.contentUrl,
+                    url      : attachment.contentUrl,
                     encoding : 'binary',
                     headers  : {
                         Authorization : 'Bearer ' + req.session.tokens.access_token
@@ -494,13 +494,13 @@ module.exports = {
 
                 delegate.get(options, function(err, res, body){
 
-                    callback(err, body);
+                    callback(err, attachment, body);
 
                 });
                 
             } else {
 
-                callback(err, item);
+                callback(err, attachment);
 
             }
 
