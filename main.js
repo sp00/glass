@@ -536,7 +536,7 @@ module.exports = {
      * @param {Object} req
      * @param {String} bundleId
      * @param {Array} items
-     * @param {Function} callback
+     * @param {Function} callback(err, result)
      */
     insertBundleItems: function(req, bundleId, items, callback){
 
@@ -550,7 +550,7 @@ module.exports = {
         items.forEach(function(item){
 
             item.bundleId = bundleId;
-            item.isBundleColor = isBundleCover;
+            item.isBundleCover = isBundleCover;
 
             if (isBundleCover){
 
