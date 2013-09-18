@@ -1,7 +1,8 @@
 /*jslint nodejs: true */
 
 // required modules
-var db = require('db'),
+var async = require('async'),
+    db = require('db'),
     querystring = require('querystring'),
     request = require('request'),
     url = require('url');
@@ -520,6 +521,65 @@ module.exports = {
             callback(err, body);
 
         });
+
+    },
+
+    // ===================================================================
+    // === Bundles =======================================================
+    // ===================================================================
+
+    /**
+     * insert a new timeline bundle
+     *
+     * Note: The first item in the items array will be set as the bundle cover.
+     *
+     * @param {Object} req
+     * @param {String} bundleId
+     * @param {Array} items
+     * @param {Function} callback
+     */
+    insertBundleItems: function(req, bundleId, items, callback){
+
+        var delegate = this;
+        var callbacks = [];
+        var isBundleCover = true;
+        var bundleTime = new Date();
+        var orderId = 0;
+        var stepDelay = 1000;
+
+        items.forEach(function(item){
+
+            item.bundleId = bundleId;
+            item.isBundleColor = isBundleCover;
+
+            if (isBundleCover){
+
+                isBundleCover = false;
+
+            } else {
+
+                var displayTime = new Date(bundleTime);
+                displayTime.setSeconds(bundleTime.getSeconds() + (items.length - orderId));
+                item.displayTime = displayTime;
+
+            }
+
+            callbacks.push(function(callback){
+
+                setTimeout(function(){
+
+                    // @todo: account for how to handle attachments
+                    delegate.insertItem(req, item, callback);
+
+                }, stepDelay * orderId);
+
+            });
+
+            orderId++;
+
+        });
+
+        async.series(callbacks, callback);
 
     },
 
