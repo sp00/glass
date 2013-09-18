@@ -653,6 +653,36 @@ module.exports = {
     },
 
     // ===================================================================
+    // === Locations =====================================================
+    // ===================================================================
+
+    /**
+     * get list of timeline locations
+     *
+     * @method getLocations
+     * @param {Object} req
+     * @param {Function} callback(err, locations)
+     */
+    getLocations: function(req, callback){
+
+        //console.log('getLocations:req', req);
+
+        var options = {
+            url     : 'https://www.googleapis.com/mirror/v1/locations',
+            headers : { Authorization: 'Bearer ' + req.session.tokens.access_token }
+        };
+
+        //console.log('getLocations:options', options);
+
+        this.get(req, options, function(err, res, body){
+
+            callback(err, body);
+
+        });
+
+    },
+
+    // ===================================================================
     // === Subscriptions =================================================
     // ===================================================================
 
