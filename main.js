@@ -510,7 +510,7 @@ module.exports = {
         var isBundleCover = true;
         var bundleTime = new Date();
         var orderId = 0;
-        var stepDelay = 1000;
+        var stepDelay = 5; // ms
 
         items.forEach(function(item){
 
