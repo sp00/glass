@@ -224,8 +224,6 @@ module.exports = {
      */
     updateToken: function(refreshToken, accessToken, callback){
 
-        //console.log('updating token (refresh/access)', refreshToken, accessToken);
-
         // save to database
         db.query('tokens', { refresh_token: refreshToken }, function(err, tokens){
 
@@ -260,15 +258,9 @@ module.exports = {
      */
     request: function(req, options, callback, refresh){
 
-        //console.log('request:req', req);
-        //console.log('request:options', options);
-        //console.log('request:refresh', refresh);
-
         var delegate = this;
 
         request(options, function(err, res, body){
-
-            //console.log('request:request():body', body);
 
             if (/^\s*\{/.test(body)){
                 body = JSON.parse(body);
@@ -284,21 +276,15 @@ module.exports = {
 
             }
 
-            //console.log('request:request():err', err);
-
             if (err === 'Invalid Credentials'){
-
-                //console.log('request:request() Invalid Credentials');
 
                 if (refresh){
 
-                    //console.log('request:request() refreshed once already');
                     // we only attempt to refresh once
                     callback(err, res, body);
 
                 } else {
 
-                    //console.log('request:request() refreshing now');
                     // refresh token
                     var refreshOptions = {
                         url : delegate.options.tokenUri,
@@ -310,35 +296,24 @@ module.exports = {
                         },
                         json : true
                     };
-                    //console.log('request:request() refreshing refreshOptions', refreshOptions);
 
                     request.post(refreshOptions, function(err, res, body){
 
-                        //console.log('request:request().request.post():err', err);
-                        //console.log('request:request().request.post():body', body);
-
                         if (body.access_token !== undefined) {
 
-                            //console.log('request:request().request.post() setting access_token from', req.session.tokens.access_token);
-                            //console.log('request:request().request.post() setting access_token to', body.access_token);
                             // save new access token to session
                             req.session.tokens.access_token = body.access_token;
 
-                            //console.log('updateToken() old refresh', req.session.tokens.refresh_token);
-                            //console.log('updateToken() new access', body.access_token);
                             // save refreshed access token
                             delegate.updateToken(req.session.tokens.refresh_token, body.access_token, function(err){
 
-                                //console.log('updateToken():err', err);
                                 if (!err){
 
-                                    //console.log('updated token, trying request again');
                                     // try again
                                     delegate.request(req, options, callback, true);
 
                                 } else {
 
-                                    //console.log('updating token failed, done');
                                     // failed again
                                     callback(err, res, body);
 
@@ -348,7 +323,6 @@ module.exports = {
 
                         } else {
 
-                            //console.log('refreshing token failed, done');
                             callback(err, res, body);
 
                         }
@@ -359,7 +333,6 @@ module.exports = {
 
             } else {
 
-                //console.log('all went well, done');
                 callback(err, res, body);
 
             }
@@ -377,10 +350,7 @@ module.exports = {
      */
     get: function(req, options, callback){
 
-        //console.log('get:req', req);
-
         options.method = 'GET';
-        //console.log('get:options', options);
         this.request(req, options, callback);
 
     },
@@ -480,8 +450,6 @@ module.exports = {
 
         } else {
 
-            console.log('Debug: inserting item', item);
-
             var options = {
                 url     : 'https://www.googleapis.com/mirror/v1/timeline',
                 headers : { Authorization: 'Bearer ' + req.session.tokens.access_token },
@@ -508,15 +476,10 @@ module.exports = {
      */
     getItem: function(req, itemId, callback){
 
-        //console.log('getItem:req', req);
-        //console.log('getItem:itemId', itemId);
-
         var options = {
             url     : 'https://www.googleapis.com/mirror/v1/timeline/' + itemId,
             headers : { Authorization: 'Bearer ' + req.session.tokens.access_token }
         };
-
-        //console.log('getItem:options', options);
 
         this.get(req, options, function(err, res, body){
 
@@ -548,8 +511,6 @@ module.exports = {
         var bundleTime = new Date();
         var orderId = 0;
         var stepDelay = 1000;
-
-        console.log('Debug: inserting bundle items', items);
 
         items.forEach(function(item){
 
@@ -669,14 +630,10 @@ module.exports = {
      */
     getLocations: function(req, callback){
 
-        //console.log('getLocations:req', req);
-
         var options = {
             url     : 'https://www.googleapis.com/mirror/v1/locations',
             headers : { Authorization: 'Bearer ' + req.session.tokens.access_token }
         };
-
-        //console.log('getLocations:options', options);
 
         this.get(req, options, function(err, res, body){
 
