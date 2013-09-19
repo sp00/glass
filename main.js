@@ -480,6 +480,8 @@ module.exports = {
 
         } else {
 
+            console.log('Debug: inserting item', item);
+
             var options = {
                 url     : 'https://www.googleapis.com/mirror/v1/timeline',
                 headers : { Authorization: 'Bearer ' + req.session.tokens.access_token },
@@ -546,6 +548,8 @@ module.exports = {
         var bundleTime = new Date();
         var orderId = 0;
         var stepDelay = 1000;
+
+        console.log('Debug: inserting bundle items', items);
 
         items.forEach(function(item){
 
