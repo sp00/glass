@@ -135,16 +135,24 @@ module.exports = {
      */
     confirm: function(req, res, callback){
 
-        // perform a get
-        this.getLocations(req, function(err, locations){
+        var delegate = this;
 
-            //confirm test:locations { error: 'invalid_grant' }
-            console.log('confirm test:err', err);
-            console.log('confirm test:locations', locations);
-            console.log('locations type', typeof locations);
+        this.getLocations(req, function(err, result){
 
-            // end of test, continue connect
-            callback(undefined);
+            if (typeof result === 'object' && result.error !== undefined && result.error === 'invalid_grant'){
+
+                // this user uninstalled the application
+                req.session.code    = undefined;
+                req.session.profile = undefined;
+                req.session.tokens  = undefined;
+                res.redirect(delegate.generateAuthUri());
+
+            } else {
+
+                // connected
+                callback(undefined);
+
+            }
 
         });
 
