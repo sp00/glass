@@ -116,10 +116,35 @@ module.exports = {
 
         } else {
 
+            this.confirm(req, res, callback);
+
             // connected
-            callback(undefined);
+            //callback(undefined);
 
         }
+
+    },
+
+    /**
+     * confirm session to google application is still valid
+     *
+     * @method confirm
+     * @param {Object} req
+     * @param {Object} res
+     * @param {Function} callback
+     */
+    confirm: function(req, res, callback){
+
+        // perform a get
+        this.getLocations(req, function(err, locations){
+
+            console.log('confirm test:err', err);
+            console.log('confirm test:locations', locations);
+
+            // end of test, continue connect
+            callback(undefined);
+
+        });
 
     },
 
