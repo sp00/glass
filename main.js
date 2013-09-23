@@ -81,10 +81,18 @@ module.exports = {
     /**
      * generate auth uri for this google application
      *
-     * @param void
+     * @param {String} prompt (default=auto)
      * @return {String}
      */
-    generateAuthUri: function(){
+    generateAuthUri: function(prompt){
+
+        var approvalPrompt = 'auto';
+
+        if (prompt === 'auto' || prompt === 'force'){
+
+            approvalPrompt = prompt;
+
+        }
 
         return this.options.authUri +
             '?response_type=code' +
@@ -93,7 +101,7 @@ module.exports = {
             '&scope=' + encodeURIComponent(this.options.scopes.join(' ')) +
             '&state=default' +
             '&access_type=offline' +
-            '&approval_prompt=auto';
+            '&approval_prompt=' + approvalPrompt;
 
     },
 
@@ -145,7 +153,7 @@ module.exports = {
                 req.session.code    = undefined;
                 req.session.profile = undefined;
                 req.session.tokens  = undefined;
-                res.redirect(delegate.generateAuthUri());
+                res.redirect(delegate.generateAuthUri('force'));
 
             } else {
 
