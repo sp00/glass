@@ -138,8 +138,10 @@ module.exports = {
         // perform a get
         this.getLocations(req, function(err, locations){
 
+            //confirm test:locations { error: 'invalid_grant' }
             console.log('confirm test:err', err);
             console.log('confirm test:locations', locations);
+            console.log('locations type', typeof locations);
 
             // end of test, continue connect
             callback(undefined);
